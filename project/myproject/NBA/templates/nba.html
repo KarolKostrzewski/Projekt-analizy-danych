@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% block content %}
+<title>NBA</title>
+<div class="container">
+    {% if user.is_authenticated %}
+    <h1 class="text-center">Cześć, {{ user.username }}! Jesteś na stronie analizy danych NBA z sezonów zasadniczych</h1>
+    {% else %}
+    <h1 class="text-center">Witaj na stronie analizy danych NBA z sezonów zasadniczych</h1>
+    {% endif %}
+
+    <h2 class="text">Wybierz personalia 3 aktywnych graczy z ligi NBA, liczbę sezonów wstecz od 2022/2023 oraz
+        statystykę, którą chcesz przeanalizować.</h2>
+    <form method="POST" action="{% url 'nba' %}">
+        {% csrf_token %}
+        <div class="form-group d-flex align-items-center">
+            <label for="player1-choice" class="mr-2">Wybierz gracza1:</label>
+            <select class="form-control mr-2" name="player1-choice" id="player1-choice">
+                <option value="{{ player }}"> </option>
+                {% for player in active_players_full_name %}
+                <option value="{{ player }}">{{ player }}</option>
+                {% endfor %}
+            </select>
+            <div id="player-image-container">
+                <img id="player-image1" src="" >
+            </div>
+            <script>
+                const player1Select = document.getElementById('player1-choice');
+                const playerImage1 = document.getElementById('player-image1');
+            
+                player1Select.addEventListener('change', function() {
+                    const selectedPlayer1 = player1Select.value;
+                    const encodedPlayerName1 = encodeURIComponent(selectedPlayer1); // Zamiana spacji na %20
+                    const imageUrl1 = `/static/images/${encodedPlayerName1}.png`; // Zmiana ścieżki obrazu w oparciu o wybór gracza
+                    playerImage1.src = imageUrl1;
+                });
+            </script>
+        </div>
+        
+        <div class="form-group d-flex align-items-center">
+            <label for="player2-choice">Wybierz gracza2:</label>
+            <select class="form-control mr-2" name="player2-choice" id="player2-choice">
+                <option value="{{ player }}"> </option>
+                {% for player in active_players_full_name %}
+                <option value="{{ player }}">{{ player }}</option>
+                {% endfor %}
+            </select>
+            <div id="player-image-container">
+                <img id="player-image2" src="">
+            </div>
+            <script>
+                const player2Select = document.getElementById('player2-choice');
+                const playerImage2 = document.getElementById('player-image2');
+            
+                player2Select.addEventListener('change', function() {
+                    const selectedPlayer2 = player2Select.value;
+                    const encodedPlayerName2 = encodeURIComponent(selectedPlayer2); // Zamiana spacji na %20
+                    const imageUrl2 = `/static/images/${encodedPlayerName2}.png`; // Zmiana ścieżki obrazu w oparciu o wybór gracza
+                    playerImage2.src = imageUrl2;
+                });
+            </script>
+        </div>
+        <div class="form-group d-flex align-items-center">
+            <label for="player3-choice">Wybierz gracza3:</label>
+            <select class="form-control mr-2" name="player3-choice" id="player3-choice">
+                <option value="{{ player }}"> </option>
+                {% for player in active_players_full_name %}
+                <option value="{{ player }}">{{ player }}</option>
+                {% endfor %}
+            </select>
+            <div id="player-image-container">
+                <img id="player-image3" src="" >
+            </div>
+            <script>
+                const player3Select = document.getElementById('player3-choice');
+                const playerImage3 = document.getElementById('player-image3');
+            
+                player3Select.addEventListener('change', function() {
+                    const selectedPlayer3 = player3Select.value;
+                    const encodedPlayerName3 = encodeURIComponent(selectedPlayer3); // Zamiana spacji na %20
+                    const imageUrl3 = `/static/images/${encodedPlayerName3}.png`; // Zmiana ścieżki obrazu w oparciu o wybór gracza
+                    playerImage3.src = imageUrl3;
+                });
+            </script>
+        </div>
+        <div class="form-group">
+            <label for="number-choice">Wybierz ilość sezonów wstecz</label>
+            <select class="form-control" name="number-choice" id="number-choice">
+                {% for num in seasons_list %}
+                <option value="{{ num }}">{{ num }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="stat-choice">Wybierz statystykę</label>
+            <select class="form-control" name="stat-choice" id="stat-choice">
+                {% for stat in list_stats %}
+                <option value="{{ stat }}">{{ stat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="text-center">
+            <button class="btn btn-primary" type="submit" name="generate-chart">Generuj wykres</button>
+        </div>
+    </form>
+    {% if chart_image %}
+    <div class="text-center mt-5">
+        <img class="img-fluid" src="{{ chart_image }}" alt="Wykres">
+    </div>
+    {% endif %}
+    {% if user.is_authenticated %}
+    <div class="center mt-4">
+        <p>Statystyki z całej kariery gracza {{ player1 }}</p>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped table-bordered table-success mt-4">
+            <thead>
+                <tr>
+                    {% for column_name in chart1.columns %}
+                    {% if forloop.counter0 >= 3 %}
+                    <th scope="col">{{ column_name }}</th>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in chart1.iterrows %}
+                {% with row_values=row.1 %}
+                <tr>
+                    {% for value in row_values %}
+                    {% if forloop.counter0 >= 3 %}
+                    <td>{{ value }}</td>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endwith %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="center mt-4">
+        <p>Statystyki z całej kariery gracza {{ player2 }}</p>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped table-bordered table-success mt-4">
+            <thead>
+                <tr>
+                    {% for column_name in chart2.columns %}
+                    {% if forloop.counter0 >= 3 %}
+                    <th scope="col">{{ column_name }}</th>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in chart2.iterrows %}
+                {% with row_values=row.1 %}
+                <tr>
+                    {% for value in row_values %}
+                    {% if forloop.counter0 >= 3 %}
+                    <td>{{ value }}</td>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endwith %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="center mt-4">
+        <p>Statystyki z całej kariery gracza {{ player3 }}</p>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped table-bordered table-success mt-4">
+            <thead>
+                <tr>
+                    {% for column_name in chart3.columns %}
+                    {% if forloop.counter0 >= 3 %}
+                    <th scope="col">{{ column_name }}</th>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in chart3.iterrows %}
+                {% with row_values=row.1 %}
+                <tr>
+                    {% for value in row_values %}
+                    {% if forloop.counter0 >= 3 %}
+                    <td>{{ value }}</td>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endwith %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="center mt-4">
+        <p>Zaloguj się, żeby zobaczyć więcej danych.</p>
+        </div>
+    {% endif %}
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+{% endblock content %}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<title>Strona główna</title>
+
+<div class="row justify-content-center">
+    <div class="card mx-2" style="width: 18rem;">
+        <img src="/static/images/0NBAstats.png" class="card-img-top" alt="...">
+        <div class="card-body">
+            <h5 class="card-title">NBA</h5>
+            <p class="card-text">Analizuj dane graczy z ligi NBA z sezonów zasadniczych</p>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'nba' %}" class="btn btn-primary">NBA</a>
+        </div>
+</div>
+
+<div class="card mx-2" style="width: 18rem;">
+    <img src="/static/images/0NBAstats.png" class="card-img-top" alt="...">
+    <div class="card-body">
+        <h5 class="card-title">NBA</h5>
+        <p class="card-text">Analizuj dane graczy z ligi NBA z fazy playoff</p>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'nba_postseason' %}" class="btn btn-primary">NBA playoff</a>
+        </div>
+</div>
+
+<div class="card mx-2" style="width: 18rem;">
+    <img src="/static/images/0Snooker.png" class="card-img-top" alt="...">
+    <div class="card-body">
+        <h5 class="card-title">SNOOKER</h5>
+        <p class="card-text">Analizuj dane graczy ze Snookera</p>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'snooker' %}" class="btn btn-primary">Snooker</a>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,62 @@
+Jak mogę połączyć  poniższe kody Python z moim projektem Django, żeby użytkownik mógł wybrać za pomocą <form> listy active_players_full_name, oraz listę liczb od 1 do 23
+plik nba_ustawienia.py:
+from nba_api.stats.static import players
+player_list=players.get_active_players()
+player1 ='LeBron James'
+seasons_countback=7
+choosen_stat ='FG_PCT'
+seasons=['2000-01','2001-02','2002-03','2003-04','2004-05','2005-06','2006-07','2007-08','2008-09','2009-10','2010-11','2011-12','2012-13','2013-14','2014-15','2015-16','2016-17','2017-18','2018-19','2019-20','2020-21','2021-22','2022-23']
+list_of_stats=['GP','GS','MIN','FGM','FGA','FG_PCT','FG3M','FG3A','FG3_PCT','FTM','FTA','FT_PCT','OREB','DREB','REB','AST','STL','BLK','TOV','PF','PTS']
+stats= {"GP":6,"GS":7,"MIN":8,"FGM":9,"FGA":10,"FG_PCT":11,"FG3M":12,"FG3A":13,"FG3_PCT":14,"FTM":15,"FTA":16,"FT_PCT":17,"OREB":18,"DREB":19,"REB":20,"AST":21,"STL":22,"BLK":23,"TOV":24,"PF":25,"PTS":26,}
+plik nba.py:
+from nba_api.stats.endpoints import playercareerstats
+from nba_api.stats.static import players
+import nba_ustawienia as u
+import pandas as pd
+import matplotlib.pyplot as plt
+class Dane:
+    def __init__(self):
+        self.player1 = u.player1
+        self.seasons_countback = u.seasons_countback
+        self.seasons = u.seasons
+        self.choosen_stat = u.choosen_stat
+        self.choosen_stat_idx = u.stats[self.choosen_stat]
+    def pobierz_dane(self):
+        self.player_list = players.get_active_players()
+        self.active_players_full_name = []
+        self.active_players_id = dict()
+        for i in range(len(self.player_list)):
+            full_name = self.player_list[i]['full_name']
+            id = self.player_list[i]['id']
+            self.active_players_full_name.append(full_name)
+            self.active_players_id[full_name]=id
+        self.id1 = self.active_players_id[self.player1]
+        self.career1 = playercareerstats.PlayerCareerStats(player_id=self.id1) 
+        self.nba1=self.career1.get_dict()
+        self.stat1 = []
+        if len(self.nba1["resultSets"][0]["rowSet"]) >= self.seasons_countback:
+            for i in range(len(self.nba1["resultSets"][0]["rowSet"])-self.seasons_countback,len(self.nba1["resultSets"][0]["rowSet"])):
+                self.stat1.append(self.nba1["resultSets"][0]["rowSet"][i][self.choosen_stat_idx])
+        else:
+            for i in range(len(self.nba1["resultSets"][0]["rowSet"])):
+                self.stat1.append(self.nba1["resultSets"][0]["rowSet"][i][self.choosen_stat_idx])
+            for i in range(self.seasons_countback- len(self.nba1["resultSets"][0]["rowSet"])):
+                self.stat1.insert(0,None)
+        return self.stat1
+    def pobierz_liste_sezonow(self):
+        self.selected_seasons = []
+        for i in range(self.seasons_countback,0,-1):
+            self.selected_seasons.append(self.seasons[len(self.seasons)-i])
+        return self.selected_seasons
+    def zrob_wykres(self):
+        df = pd.DataFrame({'Daty': self.selected_seasons, 'Punkty gracza 1': self.stat1})
+        plt.plot(df['Daty'], df['Punkty gracza 1'], label=self.player1)
+        plt.xlabel('Sezony')
+        plt.ylabel('Punkty')
+        plt.title('Porównanie')
+        plt.legend()
+        plt.show()
+    def zrob_tabele(self):
+        print(self.career1.get_data_frames()[0])
+    def career(self):
+        print(self.career1.get_data_frames()[1])
